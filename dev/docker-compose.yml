@@ -1,0 +1,55 @@
+version: "3.7"
+
+services:
+
+  postgres-nati:
+    container_name: postgres-nati
+    image: postgres:10-alpine
+    restart: "no"
+    ports:
+      - "$POSTGRES_PORT:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB:  ${POSTGRES_DATABASE}
+      PGPASSWORD: ${POSTGRES_ADMIN_PASSWORD}
+    volumes:
+      - my-db:/var/lib/postgresql/data:cached
+    networks: 
+      - dev-nati
+
+  redis-nati:
+    container_name: redis-nati
+    image: bitnami/redis:5.0
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - my-redis:/bitnami/redis/data
+    networks: 
+      - dev-nati
+
+  localstack-nati:
+      container_name: localstack-nati
+      image: localstack/localstack-full:0.12.6
+      ports:
+        - "${AWS_PORT}:4566"
+      networks: 
+        - dev-nati
+      environment:
+        - SERVICES=s3
+        - PORT_WEB_UI=8088
+        - DEFAULT_REGION=us-west-1
+        - DATA_DIR=./localstack/data
+      volumes:
+        - ./localstack/docker-entrypoint-initaws.d:/docker-entrypoint-initaws.d
+
+volumes:
+  my-db:
+  my-redis:
+
+networks:
+  dev-nati:
+    name: dev-nati-network
