@@ -46,6 +46,52 @@ services:
       volumes:
         - ./localstack/docker-entrypoint-initaws.d:/docker-entrypoint-initaws.d
 
+  frontend-nati:
+      image: node:12
+      user: node
+      command: npm run start
+      container_name: frontend-nati
+      working_dir: $NATI_FRONTEND_FOLDER
+      command: npm start
+      volumes:
+        - "../../nati-papelera-frontend:$NATI_FRONTEND_FOLDER:cached"
+      ports:
+        - "3000:3000"
+      networks: 
+        - dev-nati
+      environment: 
+        - "REACT_APP_JWT_SECRET_KEY=$JWT_SECRET_KEY"
+        - "REACT_APP_FACEBOOK_APP_ID=$FACEBOOK_APP_ID"
+        - "REACT_APP_INSTAGRAM_CLIENT_ID=$INSTAGRAM_CLIENT_ID"
+        - "REACT_APP_API_URL=$API_URL"
+        - "REACT_APP_TIMEOUT=10000"
+
+  backend-nati:
+      image: node:12
+      user: node
+      command: npm run start:debug
+      container_name: backend-nati
+      working_dir: $NATI_BACKEND_FOLDER
+      volumes:
+        - "../../nati-papelera-backend:$NATI_BACKEND_FOLDER:cached"
+      ports:
+        - "3001:3001"
+      env_file: .env
+      networks: 
+        - dev-nati
+
+  nginx-nati:
+      container_name: nginx-nati
+      image: nginx:1.18.0
+      volumes:
+          - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+          - ./nginx/ssl:/etc/nginx/ssl:ro
+      ports:
+        - "80:9080"
+        - "443:9443"
+      networks:
+        - dev-nati
+
 volumes:
   my-db:
   my-redis:
