@@ -49,7 +49,6 @@ services:
   frontend-nati:
       image: node:12
       user: node
-      command: npm run start
       container_name: frontend-nati
       working_dir: $NATI_FRONTEND_FOLDER
       command: npm start
