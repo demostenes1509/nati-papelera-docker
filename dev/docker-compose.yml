@@ -92,6 +92,8 @@ services:
     ports:
       - "80:9080"
       - "443:9443"
+    extra_hosts:
+      - "local.natipapelera:${LOCAL_NATI_PAPELERA_IP}"
     depends_on:
       - backend-nati
       - frontend-nati
