@@ -51,10 +51,18 @@ services:
     container_name: frontend-nati
     working_dir: $NATI_FRONTEND_FOLDER
     command: npm start
+    healthcheck:
+      test: ["CMD-SHELL", "curl http://localhost:3000/robots.txt"]
+      interval: 5s
+      timeout: 2s
+      retries: 50
     volumes:
       - "../../nati-papelera-frontend:$NATI_FRONTEND_FOLDER:cached"
     ports:
       - "3000:3000"
+    depends_on:
+      backend-nati:
+        condition: service_healthy
     networks:
       - dev-nati
     environment:
@@ -71,6 +79,11 @@ services:
     command: npm run start:debug
     container_name: backend-nati
     working_dir: $NATI_BACKEND_FOLDER
+    healthcheck:
+      test: ["CMD-SHELL", "curl http://localhost:3001/healthcheck"]
+      interval: 5s
+      timeout: 2s
+      retries: 50
     volumes:
       - "../../nati-papelera-backend:$NATI_BACKEND_FOLDER:cached"
     ports:
@@ -93,8 +106,8 @@ services:
       - "80:9080"
       - "443:9443"
     depends_on:
-      - backend-nati
-      - frontend-nati
+      frontend-nati:
+        condition: service_healthy
     networks:
       - dev-nati
 
